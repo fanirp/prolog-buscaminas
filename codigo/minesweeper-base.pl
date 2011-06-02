@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 pre_r(N,T) :- get_time(T1), stamp_date_time(T1, X1, 'UTC'), write(X1), nl, problem(N,T).
 post_r(T) :- mostrar(T), get_time(T2), stamp_date_time(T2, X2, 'UTC'), write(X2).
 
