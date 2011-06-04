@@ -7,12 +7,12 @@ valor(N) :- between(0,8,N).
 longitud([],0).
 longitud([_|L],N) :- longitud(L,Y), N is Y+1.
 
-%dimension(+T,-Cols,-Fils)
-dimension([],_,0).
-dimension([L|LS],C,F) :- longitud(L,C), dimension(LS,C,P), F is P+1.
+%dim(+T,-Cols,-Fils)
+dim([],_,0).
+dim([L|LS],C,F) :- longitud(L,C), longitud(LS,P), F is P+1.
 
 %pos(+T, -C, -F)
-pos(T,C,F) :- dimension(T,COLS,FILS), between(1,FILS,F), between(1,COLS,C).
+pos(T,C,F) :- dim(T,COLS,FILS), between(1,FILS,F), between(1,COLS,C).
 
 %nonvars(?L, −R)
 nonvars([],[]).
@@ -41,11 +41,13 @@ igualesDeAPares(C,F,I,J) :- C =:= I, F =:= J.
 dame_valor(T,C,F,Elem) :- elem_en_pos(T,F,Fila),elem_en_pos(Fila,C,Elem). 
 
 %elem_en_pos(+T,+P,-Elem). En Elem pone el valor en la posicion P de la lista T.
-elem_en_pos([Cab|Cola],1,Cab).
-elem_en_pos([Cab|Cola],N,X) :- F is N-1,F > 0 , elem_en_pos(Cola,F,X).
+elem_en_pos([Cab|_],1,Cab).
+elem_en_pos([_|Cola],N,X) :- F is N-1,F > 0 , elem_en_pos(Cola,F,X).
 
 
 %consistente(+T,+C,+F) 
-consistente(T,C,F) :- vecinos(T,C,F,L), cant_minas(L,N), dame_valor(T,C,F,Elem), Elem =:= N.
+consistente(T,C,F) :- vecinos(T,C,F,L), cant_minas(L,N), dame_valor(T,C,F,Elem),not(esMina(Elem)), Elem =:= N.
 
+%consistente(+T)
+consistente(T) :- pos(T,C,F), consistente(T,C,F).
 
