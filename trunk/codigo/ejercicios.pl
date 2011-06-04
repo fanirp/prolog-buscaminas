@@ -1,19 +1,20 @@
-%entre(+X,+Y,-Z)
-entre(X,Y,X) :- X=<Y.
-entre(X,Y,Z) :- X<Y,N is X+1,entre(N,Y,Z).
-
 %valor(-X)
 valor(mina).
-valor(N) :- entre(0,8,N).
+valor(N) :- between(0,8,N).
 
 
 %longitud(+L,-N)
 longitud([],0).
-longitud([X|L],N) :- longitud(L,Y), N is Y+1.
+longitud([_|L],N) :- longitud(L,Y), N is Y+1.
 
 %dimension(+T,-Cols,-Fils)
 dimension([],_,0).
 dimension([L|LS],C,F) :- longitud(L,C), dimension(LS,C,P), F is P+1.
 
 %pos(+T, -C, -F)
-pos(T,C,F) :- dimension(T,COLS,FILS), entre(1,FILS,F), entre(1,COLS,C). 
+pos(T,C,F) :- dimension(T,COLS,FILS), between(1,FILS,F), between(1,COLS,C).
+
+%nonvars(?L, −R)
+nonvars([],[]).
+nonvars([X|XS],L) :- nonvar(X), nonvars(XS,LS), append([X],[LS],L).
+nonvars([X|XS],L) :- var(X), nonvars(XS,LS), append([],LS,L).
