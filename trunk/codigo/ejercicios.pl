@@ -29,7 +29,7 @@ cant_minas([X|XS],N) :- var(X), cant_minas(XS,N).
 esMina(mina).
 
 %vecinos(+T, +C, +F, −L) 
-vecinos(T,C,F,Vecinos) :- setof(Vecino,vecinos_aux(T,C,F,Vecino),Vecinos).
+vecinos(T,C,F,Vecinos) :- bagof(Vecino,vecinos_aux(T,C,F,Vecino),Vecinos).
 vecinos_aux(T,C,F,Vecino) :- Fm1 is F-1, FM1 is F+1, Cm1 is C-1, CM1 is C+1,
 			     between(Fm1,FM1,I),between(Cm1,CM1,J),not(igualesDeAPares(C,F,I,J)),
 		             dame_valor(T,J,I,Vecino).
@@ -45,5 +45,7 @@ elem_en_pos([Cab|Cola],1,Cab).
 elem_en_pos([Cab|Cola],N,X) :- F is N-1,F > 0 , elem_en_pos(Cola,F,X).
 
 
+%consistente(+T,+C,+F) 
+consistente(T,C,F) :- vecinos(T,C,F,L), cant_minas(L,N), dame_valor(T,C,F,Elem), Elem =:= N.
 
 
