@@ -31,7 +31,7 @@ esMina(mina).
 %vecinos(+T, +C, +F, −L) 
 vecinos(T,C,F,Vecinos) :- bagof(Vecino,vecinos_aux(T,C,F,Vecino),Vecinos).
 vecinos_aux(T,C,F,Vecino) :- Fm1 is F-1, FM1 is F+1, Cm1 is C-1, CM1 is C+1,
-			     between(Fm1,FM1,I),between(Cm1,CM1,J),not(igualesDeAPares(C,F,I,J)),
+			     between(Fm1,FM1,I),between(Cm1,CM1,J),not(igualesDeAPares(F,C,I,J)),
 		             dame_valor(T,J,I,Vecino).
 
 %igualesDeAPares(+C,+F,+I,+J)
@@ -46,8 +46,11 @@ elem_en_pos([_|Cola],N,X) :- F is N-1,F > 0 , elem_en_pos(Cola,F,X).
 
 
 %consistente(+T,+C,+F) 
-consistente(T,C,F) :- vecinos(T,C,F,L), cant_minas(L,N), dame_valor(T,C,F,Elem),not(esMina(Elem)), Elem =:= N.
+consistente(T,C,F) :- dame_valor(T,C,F,Elem),esMina(Elem).
+consistente(T,C,F) :- dame_valor(T,C,F,Elem),not(esMina(Elem)), vecinos(T,C,F,L), cant_minas(L,N), Elem =:= N.
+
 
 %consistente(+T)
-consistente(T) :- pos(T,C,F), consistente(T,C,F).
+consistente(T) :- not(consistente_aux(T)).
+consistente_aux(T) :- pos(T,C,F), not(consistente(T,C,F)).
 
