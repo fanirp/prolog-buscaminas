@@ -66,10 +66,10 @@ def store_boards(boards, dir):
     if not os.path.exists(dir): os.makedirs(dir)
     for algorithm, problems in boards.iteritems():
         for problem, problem_boards in problems.iteritems():
-            for i, board in enumerate(problem_boards):
-                fname= os.path.join(dir, '%s_%s_%.2d' % (algorithm, problem, i+1))
-                with open(fname, 'w') as f:
-                    f.write(board)
+            problem_boards= '\n\n'.join(problem_boards)
+            fname= os.path.join(dir, '%s_%s' % (algorithm, problem))
+            with open(fname, 'w') as f:
+                f.write(problem_boards)
 
 def store_times(times, fname):
     tmpfname= mktemp()

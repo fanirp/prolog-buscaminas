@@ -54,3 +54,30 @@ consistente(T,C,F) :- dame_valor(T,C,F,Elem),not(esMina(Elem)), vecinos(T,C,F,L)
 consistente(T) :- not(consistente_aux(T)).
 consistente_aux(T) :- pos(T,C,F), not(consistente(T,C,F)).
 
+
+
+%completarA(?T)
+completarA(T) :- todoInstanciado(T), consistente(T).
+
+
+%todoInstanciado(?T) RECIBE UN TABLERO Y LO INSTANCIA SI HACE FALTA
+todoInstanciado([]).
+todoInstanciado([X|XS]) :- nonvar(X),listaInstanciada(X), todoInstanciado(XS).
+todoInstanciado([X|XS]) :- var(X), dim(XS,Cols,_), listaDeVarDeLong(Cols,L), todoInstanciado([L|XS]).
+
+
+%listaInstanciada(?X) RECIBE UNA LISTA Y LA INSTANCIA SI HACE FALTA
+listaInstanciada([]).
+listaInstanciada([X|XS]) :- nonvar(X), listaInstanciada(XS).
+listaInstanciada([X|XS]) :- var(X), valor(X), listaInstanciada(XS).
+
+
+
+
+%completarA(?T)
+%completarA(T) :- completarAux(T), consistente(T).
+
+%completarAux(T) resuelve completarA pero con las dim del tablero
+%completarAux(T) :- pos(T,C,F), completarPos(T,C,F).
+
+%completarPos(T,C,F) :- dame_valor(T,C,F,Elem), var(Elem), valor(Elem).
