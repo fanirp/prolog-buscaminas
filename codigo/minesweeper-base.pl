@@ -398,28 +398,77 @@ completarPos(T,C,F) :- dame_valor(T,C,F,Elem), nonvar(Elem).
 
 %%%%%%%%% EJERCICIO CASI 11 %%%%%%%%%
 
-%completarC(?T)
-completarC(T) :- dim(T,Cols,Fils), completarAux(T,Cols,Fils), consistente(T).
+completarC(T) :- dim(T,Cols,Fils), completarAuxC(T,Cols,Fils,Cols,Fils), consistente(T).
 
-%completarAux(T) completa el tablero de todas las formas posibles
-completarAux(T,1,1) :- completarPos(T,1,1), consistenteConVariables(T,1,1).
 
-completarAux(T,1,F) :- 	dim(T,Cols,_),
-			completarPos(T,1,F),
-			consistenteConVariables(T,1,F),
-			Fm1 is F-1,
-			completarAux(T,Cols,Fm1).
+%completarAuxB(?T,+C,+F,+Cols,+Fils). Completa el tablero de todas las formas posibles desde la posicion (F,C), recorriendo de derecha a izquierda y de abajo hacia arriba hasta llegar a la posicion (1,1).
 
-completarAux(T,C,F) :- 	C>1, 
-			completarPos(T,C,F),
-			consistenteConVariables(T,C,F),
-			Cm1 is C-1,
-			completarAux(T,Cm1,F).
+%CASO A: primer casillero (ultimo de la recursion)
+completarAuxC(T,1,1,_,_) :- 	completarPos(T,1,1), consistente(T,1,1),
+				consistente(T,2,1), consistente(T,1,2),
+				consistente(T,2,2).
+
+%CASO B: primer fila, cualquier columna que no sea extremo
+completarAuxC(T,C,1,Cols,Fils) :- 	C>1, C<Cols,
+					completarPos(T,C,1),
+					consistenteConVariables(T,C,1),
+					CM1 is C+1,
+					consistente(T,CM1,1),
+					consistente(T,CM1,2),
+					Cm1 is C-1,
+					completarAuxC(T,Cm1,1,Cols,Fils).
+					
+%CASO C: ultima columna, cualquier fila menos la ultima
+completarAuxC(T,C,F,Cols,Fils) :- 	C=:=Cols, F<Fils,
+					completarPos(T,C,F),
+					consistenteConVariables(T,C,F),
+					Cm1 is C-1,
+					completarAuxC(T,Cm1,F,Cols,Fils).
+
+%CASO D: primer columna, cualquier fila que no es extremo
+completarAuxC(T,1,F,Cols,Fils) :- 	F<Fils, F>1,
+					completarPos(T,1,F),
+					consistenteConVariables(T,1,F),
+					FM1 is F+1,
+					consistente(T,1,FM1),
+					consistente(T,2,FM1),
+					Fm1 is F-1,
+					completarAuxC(T,Cols,Fm1,Cols,Fils).
+
+%CASO E: filas y columnas que no son extremos
+completarAuxC(T,C,F,Cols,Fils) :- 	C>1, C<Cols, F>1, F<Fils,
+					completarPos(T,C,F),
+					consistenteConVariables(T,C,F),
+					CM1 is C+1,
+					FM1 is F+1,
+					consistente(T,CM1,FM1),
+					Cm1 is C-1,
+					completarAuxC(T,Cm1,F,Cols,Fils).
+					
+%CASO F: primer columna, ultima fila
+completarAuxC(T,1,F,Cols,Fils) :- 	F=:=Fils,
+					completarPos(T,1,F),
+					consistenteConVariables(T,1,F),
+					Fm1 is F-1,
+					completarAuxC(T,Cols,Fm1,Cols,Fils).
+					
+%CASO G: ultima fila, cualquier columna menos la primera
+completarAuxC(T,C,F,Cols,Fils) :- 	F=:=Fils, C>1,
+					completarPos(T,C,F),
+					consistenteConVariables(T,C,F),
+					Cm1 is C-1,
+					completarAuxC(T,Cm1,F,Cols,Fils).
 
 
 %consistenteConVariables(+T,+C,+F) 
-consistenteConVariables(T,C,F) :- dame_valor(T,C,F,Elem),esMina(Elem).
-consistenteConVariables(T,C,F) :- dame_valor(T,C,F,Elem),not(esMina(Elem)), vecinos(T,C,F,L), cantvars(L,CantVars), cant_minas(L,N), Elem >= N, Elem=<CantVars+N.
+consistenteConVariables(T,C,F) :- 	dame_valor(T,C,F,Elem),esMina(Elem),
+					vecinos(T,C,F,Vecinos), nonvars(Vecinos,VecinosSinVars),
+					not(member(0,VecinosSinVars)).
+					
+consistenteConVariables(T,C,F) :- 	dame_valor(T,C,F,Elem),not(esMina(Elem)), 
+					vecinos(T,C,F,L), cantvars(L,CantVars),
+					cant_minas(L,CantMinas), 
+					Elem >= CantMinas, Elem=<CantVars+CantMinas.
 
 
 cantvars([],0).
