@@ -18,11 +18,11 @@ mostrar_celda(C) :-	nonvar(C), C \= mina, write(C).
 mostrar_celda(C) :- var(C), write('_').
 
 
-problem(t1, [[2,_],
-			 [_,_]]).
+problem(t1, [[_,_],
+			 [_,1]]).
 
 problem(t2, [[_,_],
-			 [_,1]]).
+			 [_,2]]).
 
 problem(t3, [[_,_],
 			 [_,3]]).
@@ -329,9 +329,83 @@ listaInstanciada([X|XS]) :- var(X), valor(X), listaInstanciada(XS).
 
 
 %%%%%%%%% EJERCICIO 10 %%%%%%%%%
+completarB(T) :- dim(T,Cols,Fils), completarAuxB(T,Cols,Fils,Cols,Fils), consistente(T).
 
-%completarB(?T)
-completarB(T) :- dim(T,Cols,Fils), completarAux(T,Cols,Fils), consistente(T).
+
+%completarAuxB(?T,+C,+F,+Cols,+Fils). Completa el tablero de todas las formas posibles desde la posicion (F,C), recorriendo de derecha a izquierda y de abajo hacia arriba hasta llegar a la posicion (1,1).
+
+%CASO A: primer casillero (ultimo de la recursion)
+completarAuxB(T,1,1,_,_) :- 	completarPos(T,1,1), consistente(T,1,1),
+				consistente(T,2,1), consistente(T,1,2),
+				consistente(T,2,2).
+
+%CASO B: primer fila, cualquier columna que no sea extremo
+completarAuxB(T,C,1,Cols,Fils) :- 	C>1, C<Cols,
+					completarPos(T,C,1),
+					CM1 is C+1,
+					consistente(T,CM1,1),
+					consistente(T,CM1,2),
+					Cm1 is C-1,
+					completarAuxB(T,Cm1,1,Cols,Fils).
+					
+%CASO C: ultima columna, cualquier fila menos la ultima
+completarAuxB(T,C,F,Cols,Fils) :- 	C=:=Cols, F<Fils,
+					completarPos(T,C,F),
+					Cm1 is C-1,
+					completarAuxB(T,Cm1,F,Cols,Fils).
+
+%CASO D: primer columna, cualquier fila que no es extremo
+completarAuxB(T,1,F,Cols,Fils) :- 	F<Fils, F>1,
+					completarPos(T,1,F),
+					FM1 is F+1,
+					consistente(T,1,FM1),
+					consistente(T,2,FM1),
+					Fm1 is F-1,
+					completarAuxB(T,Cols,Fm1,Cols,Fils).
+
+%CASO E: filas y columnas que no son extremos
+completarAuxB(T,C,F,Cols,Fils) :- 	C>1, C<Cols, F>1, F<Fils,
+					completarPos(T,C,F),
+					CM1 is C+1,
+					FM1 is F+1,
+					consistente(T,CM1,FM1),
+					Cm1 is C-1,
+					completarAuxB(T,Cm1,F,Cols,Fils).
+					
+%CASO F: primer columna, ultima fila
+completarAuxB(T,1,F,Cols,Fils) :- 	F=:=Fils,
+					completarPos(T,1,F),
+					Fm1 is F-1,
+					completarAuxB(T,Cols,Fm1,Cols,Fils).
+					
+%CASO G: ultima fila, cualquier columna menos la primera
+completarAuxB(T,C,F,Cols,Fils) :- 	F=:=Fils, C>1,
+					completarPos(T,C,F),
+					Cm1 is C-1,
+					completarAuxB(T,Cm1,F,Cols,Fils).
+					
+%EJEMPLO DE COMO DIVIDIMOS EL TABLERO
+%
+% A B B B B C
+% D E E E E C
+% D E E E E C
+% . . . . . .
+% D E E E E C
+% F G G G G G
+%
+% donde cada letra se corresponde con el CASO de completarAuxB que cubre esa posicion
+
+
+%completarPos(?T,+C,+F)
+completarPos(T,C,F) :- dame_valor(T,C,F,Elem), var(Elem), valor(Elem).
+completarPos(T,C,F) :- dame_valor(T,C,F,Elem), nonvar(Elem).
+
+
+
+%%%%%%%%% EJERCICIO CASI 11 %%%%%%%%%
+
+%completarC(?T)
+completarC(T) :- dim(T,Cols,Fils), completarAux(T,Cols,Fils), consistente(T).
 
 %completarAux(T) completa el tablero de todas las formas posibles
 completarAux(T,1,1) :- completarPos(T,1,1), consistenteConVariables(T,1,1).
@@ -348,10 +422,6 @@ completarAux(T,C,F) :- 	C>1,
 			Cm1 is C-1,
 			completarAux(T,Cm1,F).
 
-%completarPos(?T,+C,+F)
-completarPos(T,C,F) :- dame_valor(T,C,F,Elem), var(Elem), valor(Elem).
-completarPos(T,C,F) :- dame_valor(T,C,F,Elem), nonvar(Elem).
-
 
 %consistenteConVariables(+T,+C,+F) 
 consistenteConVariables(T,C,F) :- dame_valor(T,C,F,Elem),esMina(Elem).
@@ -361,6 +431,3 @@ consistenteConVariables(T,C,F) :- dame_valor(T,C,F,Elem),not(esMina(Elem)), veci
 cantvars([],0).
 cantvars([X|XS],N) :- var(X), cantvars(XS,M), N is M+1.
 cantvars([X|XS],N) :- nonvar(X), cantvars(XS,N).
-
-
-
