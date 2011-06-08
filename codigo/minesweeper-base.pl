@@ -3,7 +3,7 @@ post_r(T) :- mostrar(T), get_time(T2), stamp_date_time(T2, X2, 'UTC'), write(X2)
 
 rA(N,T) :- pre_r(N,T), completarA(T), post_r(T).
 rB(N,T) :- pre_r(N,T), completarB(T), post_r(T).
-%rC(N,T) :- pre_r(N,T), completarC(T), post_r(T).
+rC(N,T) :- pre_r(N,T), completarC(T), post_r(T).
 	
 mostrar([]).
 mostrar([Fila|T]) :-
@@ -16,7 +16,6 @@ mostrar_lista([H|T]) :- mostrar_celda(H), mostrar_lista(T).
 mostrar_celda(C) :- nonvar(C), C == mina, write('*').
 mostrar_celda(C) :-	nonvar(C), C \= mina, write(C).
 mostrar_celda(C) :- var(C), write('_').
-
 
 problem(t1, [[_,_],
 			 [_,1]]).
@@ -46,7 +45,6 @@ problem(0,[[_,_,2,_,3,_],
            [1,_,3,4,_,_],
            [_,_,_,_,_,3],
            [_,3,_,3,_,_]]).
-
 
 
 % Problem from Gecode/examples/minesweeper.cc  problem 1
@@ -220,10 +218,6 @@ problem(14,[[_,1,_,1,_,1],
             [_,3,_,2,_,1],
             [1,_,3,_,2,_],
             [_,1,_,2,_,1]]).
-            
-            
-            
-            
             
             
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%           

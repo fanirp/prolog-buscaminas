@@ -10,13 +10,9 @@ import re
 from optparse import OptionParser
 import sys
 
-PROLOG_PATH= '/usr/bin/prolog' 
-
-def total_seconds(t):
-    return t.days*24*60*60 + t.seconds + float(t.microseconds)/10e5
 
 def main():
-    usage= 'usage: %prog [options] <solucion.pl>'
+    usage= 'usage: %prog [options] <solucion.pl> <results_fname>'
     parser= OptionParser(usage=usage)
     parser.add_option('-t', dest='timeout', help='timeout para una corrida (en segundos)', default=30, type='int')
     parser.add_option('-a', dest='algorithms', 
@@ -25,22 +21,15 @@ def main():
     parser.add_option('-p', dest='problems', 
                             help='problemas para probar. Por default, t1, t2, t3, t4, 0...14.', 
                             action='append')
-    parser.add_option('-b', '--boards-dir', dest='boards_dir', 
+    parser.add_option('--boards-dir', dest='boards_dir', 
                                       help='directorio donde guarda los boards')
-    parser.add_option('-f', '--times-fname', dest='times_fname', 
+    parser.add_option('--times-fname', dest='times_fname', 
                                        help='archivo para guardar los tiempos')
-
-    parser.add_option('--all-solutions', dest='all_solutions', 
-                                       action='store_true',
-                                       default=False,
-                                       help='flag para que calcule todas las soluciones en vez de solo la primera')
 
     options, args= parser.parse_args(sys.argv[1:])
 
     if options.times_fname is None: parser.error("--times-fname es requerido")
     if options.boards_dir is None: parser.error("--boards-dir es requerido")
-    if not os.path.exists(PROLOG_PATH): 
-        parser.error('No encuentro el prolog, configuramelo en la variable PROLOG_PATH')
 
     if os.path.exists(options.times_fname): parser.error('archivo %s ya existe' % options.times_fname)
     if os.path.exists(options.boards_dir): parser.error('directorio %s ya existe' % options.boards_dir)
@@ -58,8 +47,7 @@ def main():
         print "Running problem %s..." % problem
         for algorithm in algorithms:
             print "\tAlgorithm: %s" % algorithm
-            res= run_problem(prolog_fname, algorithm, problem, 
-                             options.timeout, all_solutions= options.all_solutions)
+            res= run_problem(prolog_fname, algorithm, problem, options.timeout)
             if res is None:
                 print "\t\tTimeout!"
                 times[algorithm][problem]= None
@@ -102,13 +90,8 @@ def store_times(times, fname):
             writer.writerow(row)
     shutil.move(tmpfname, fname) 
     
-def run_problem(prolog_fname, algorithm, problem, timeout, all_solutions=False):
-    d= {'PROLOG_PATH':PROLOG_PATH}
-    d.update(locals())
-    if all_solutions:
-        args= '%(PROLOG_PATH)s -f %(prolog_fname)s -t setof(T,%(algorithm)s(%(problem)s,T),L).' % d
-    else:
-        args= '%(PROLOG_PATH)s -f %(prolog_fname)s -t %(algorithm)s(%(problem)s,T).' % d
+def run_problem(prolog_fname, algorithm, problem, timeout):
+    args= '/usr/bin/prolog -f %(prolog_fname)s -t setof(T,%(algorithm)s(%(problem)s,T),L).' % locals()
     args= args.split()
 
     t0= time()
@@ -131,7 +114,7 @@ def run_problem(prolog_fname, algorithm, problem, timeout, all_solutions=False):
         if m is not None:
             dates.append(parse_date(m.groupdict()['date']))
             if len(actual_board) > 0:
-                durations.append(total_seconds(dates[-1] - dates[-2]))
+                durations.append((dates[-1] - dates[-2]).total_seconds())
                 boards.append('\n'.join(actual_board))
                 actual_board= []
         else:
