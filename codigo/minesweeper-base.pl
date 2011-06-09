@@ -228,17 +228,21 @@ problem(14,[[_,1,_,1,_,1],
 %%%%%%%%% EJERCICIO 1 %%%%%%%%%
 
 %valor(-X)
+%instancia X entre 0 y 8. 
 valor(mina).
 valor(N) :- between(0,8,N).
 
 
 %%%%%%%%% EJERCICIO 2 %%%%%%%%%
 
+
 %longitud(+L,-N)
+%Instancia en N la logitud de la lista
 longitud([],0).
 longitud([_|L],N) :- longitud(L,Y), N is Y+1.
 
 %dim(+T,-Cols,-Fils)
+%Instancia en Cols la cantidad de columnas y en Fils la cantidad de filas
 dim([],_,0).
 dim([L|LS],C,F) :- longitud(L,C), longitud(LS,P), F is P+1.
 
@@ -246,12 +250,14 @@ dim([L|LS],C,F) :- longitud(L,C), longitud(LS,P), F is P+1.
 %%%%%%%%% EJERCICIO 3 %%%%%%%%%
 
 %pos(+T, -C, -F)
+%Instancia en C y F las posiciones validas para un tablero.
 pos(T,C,F) :- dim(T,COLS,FILS), between(1,FILS,F), between(1,COLS,C).
 
 
 %%%%%%%%% EJERCICIO 4 %%%%%%%%%
 
 %nonvars(?L, −R)
+%Instancia en R una lista que contiene los elementos instanciados de L.
 nonvars([],[]).
 nonvars([X|XS],L) :- nonvar(X), nonvars(XS,LS), append([X],[LS],L).
 nonvars([X|XS],L) :- var(X), nonvars(XS,LS), append([],LS,L).
@@ -260,6 +266,7 @@ nonvars([X|XS],L) :- var(X), nonvars(XS,LS), append([],LS,L).
 %%%%%%%%% EJERCICIO 5 %%%%%%%%%
 
 %cant_minas(?L,-N)
+%Instancia en N la cantidad de minas en la lista L
 cant_minas([],0).
 cant_minas([X|XS],N) :- nonvar(X), esMina(X), cant_minas(XS,M), N is M+1.
 cant_minas([X|XS],N) :- nonvar(X), not(esMina(X)), cant_minas(XS,N).
@@ -272,18 +279,24 @@ esMina(mina).
 %%%%%%%%% EJERCICIO 6 %%%%%%%%%
 
 %vecinos(+T, +C, +F, −L) 
+%Instancia en L los valores de los vecinos de la celda C F en T.
 vecinos(T,C,F,Vecinos) :- bagof(Vecino,vecinos_aux(T,C,F,Vecino),Vecinos).
+
+%Intancia en Vecino, cada vecino de la celda C F en T
 vecinos_aux(T,C,F,Vecino) :- Fm1 is F-1, FM1 is F+1, Cm1 is C-1, CM1 is C+1,
 			     between(Fm1,FM1,I),between(Cm1,CM1,J),not(igualesDeAPares(F,C,I,J)),
 		             dame_valor(T,J,I,Vecino).
 
 %igualesDeAPares(+C,+F,+I,+J)
+%Devuelve verdadero si C == I y F == J , sino falla.
 igualesDeAPares(C,F,I,J) :- C =:= I, F =:= J.
 
-%dame_valor(+T,+C,+F,-Elem) En Elem pone el valor en la posicion C,F en un campo minado T.
+%dame_valor(+T,+C,+F,-Elem) 
+%Intancia en Elem, el elemento en la celda C F en T.
 dame_valor(T,C,F,Elem) :- elem_en_pos(T,F,Fila),elem_en_pos(Fila,C,Elem). 
 
-%elem_en_pos(+T,+P,-Elem). En Elem pone el valor en la posicion P de la lista T.
+%elem_en_pos(+T,+P,-Elem). 
+%Instancia en Elem  el elemento en la posicion P de la lista T.
 elem_en_pos([Cab|_],1,Cab).
 elem_en_pos([_|Cola],N,X) :- F is N-1,F > 0 , elem_en_pos(Cola,F,X).
 
@@ -292,6 +305,7 @@ elem_en_pos([_|Cola],N,X) :- F is N-1,F > 0 , elem_en_pos(Cola,F,X).
 
 
 %consistente(+T,+C,+F) 
+%Devuelve verdadero si la celda en la posicion C F en T , es consistente con respecto a sus vecinos. Sino falla.
 consistente(T,C,F) :- dame_valor(T,C,F,Elem),esMina(Elem).
 consistente(T,C,F) :- dame_valor(T,C,F,Elem),not(esMina(Elem)), vecinos(T,C,F,L), cant_minas(L,N), Elem =:= N.
 
@@ -299,6 +313,7 @@ consistente(T,C,F) :- dame_valor(T,C,F,Elem),not(esMina(Elem)), vecinos(T,C,F,L)
 %%%%%%%%% EJERCICIO 8 %%%%%%%%%
 
 %consistente(+T)
+%Devuelve verdadero  T si todas las celdas de T son consistentes. Sino falla.
 consistente(T) :- not(consistente_aux(T)).
 consistente_aux(T) :- pos(T,C,F), not(consistente(T,C,F)).
 
@@ -309,24 +324,26 @@ consistente_aux(T) :- pos(T,C,F), not(consistente(T,C,F)).
 completarA(T) :- todoInstanciado(T), consistente(T).
 
 
-%todoInstanciado(?T) RECIBE UN TABLERO Y LO INSTANCIA SI HACE FALTA
+%todoInstanciado(?T) 
+%Recibe un tablero y si es necesario lo instancia con valores permitidos.
 todoInstanciado([]).
 todoInstanciado([X|XS]) :- nonvar(X),listaInstanciada(X), todoInstanciado(XS).
 todoInstanciado([X|XS]) :- var(X), dim(XS,Cols,_), listaDeVarDeLong(Cols,L), todoInstanciado([L|XS]).
 
 
-%listaInstanciada(?X) RECIBE UNA LISTA Y LA INSTANCIA SI HACE FALTA
+%listaInstanciada(?X) 
+%Recibe una lista y lo instancia con valores permitidos si es necesario.
 listaInstanciada([]).
 listaInstanciada([X|XS]) :- nonvar(X), listaInstanciada(XS).
 listaInstanciada([X|XS]) :- var(X), valor(X), listaInstanciada(XS).
-
 
 
 %%%%%%%%% EJERCICIO 10 %%%%%%%%%
 completarB(T) :- dim(T,Cols,Fils), completarAuxB(T,Cols,Fils,Cols,Fils), consistente(T).
 
 
-%completarAuxB(?T,+C,+F,+Cols,+Fils). Completa el tablero de todas las formas posibles desde la posicion (F,C), recorriendo de derecha a izquierda y de abajo hacia arriba hasta llegar a la posicion (1,1).
+%completarAuxB(?T,+C,+F,+Cols,+Fils). 
+%Completa el tablero de todas las formas posibles desde la posicion (F,C), recorriendo de derecha a izquierda y de abajo hacia arriba hasta llegar a la posicion (1,1).
 
 %CASO A: primer casillero (ultimo de la recursion)
 completarAuxB(T,1,1,_,_) :- 	completarPos(T,1,1), consistente(T,1,1),
@@ -401,7 +418,8 @@ completarPos(T,C,F) :- dame_valor(T,C,F,Elem), nonvar(Elem).
 completarC(T) :- dim(T,Cols,Fils), completarAuxC(T,Cols,Fils,Cols,Fils), consistente(T).
 
 
-%completarAuxB(?T,+C,+F,+Cols,+Fils). Completa el tablero de todas las formas posibles desde la posicion (F,C), recorriendo de derecha a izquierda y de abajo hacia arriba hasta llegar a la posicion (1,1).
+%completarAuxB(?T,+C,+F,+Cols,+Fils). 
+%Completa el tablero de todas las formas posibles desde la posicion (F,C), recorriendo de derecha a izquierda y de abajo hacia arriba hasta llegar a la posicion (1,1).
 
 %CASO A: primer casillero (ultimo de la recursion)
 completarAuxC(T,1,1,_,_) :- 	completarPos(T,1,1), consistente(T,1,1),
@@ -460,7 +478,10 @@ completarAuxC(T,C,F,Cols,Fils) :- 	F=:=Fils, C>1,
 					completarAuxC(T,Cm1,F,Cols,Fils).
 
 
-%consistenteConVariables(+T,+C,+F) 
+%consistenteConVariables(+T,+C,+F)
+%una version de consistente(T,C,F) en la cual se toma en cuenta tableros no instanciados completamente.
+%es verdadero si el valor de la celda T F esta entre la cantidad de minas y la cantidad de minas +  variables en los vecinos. 
+
 consistenteConVariables(T,C,F) :- 	dame_valor(T,C,F,Elem),esMina(Elem),
 					vecinos(T,C,F,Vecinos), nonvars(Vecinos,VecinosSinVars),
 					not(member(0,VecinosSinVars)).
@@ -471,6 +492,7 @@ consistenteConVariables(T,C,F) :- 	dame_valor(T,C,F,Elem),not(esMina(Elem)),
 					Elem >= CantMinas, Elem=<CantVars+CantMinas.
 
 
+%devuelve la cantidad de variables en la lista en N.
 cantvars([],0).
 cantvars([X|XS],N) :- var(X), cantvars(XS,M), N is M+1.
 cantvars([X|XS],N) :- nonvar(X), cantvars(XS,N).
